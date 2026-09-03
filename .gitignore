@@ -1,0 +1,75 @@
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# Env Files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Java, Maven & Logs
+backend/target/
+**/target/
+*.class
+*.war
+*.ear
+*.nar
+*.jar
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+replay_pid*
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+backend/.mvn/wrapper/maven-wrapper.jar
+mvnw.cmd
+backend/mvnw.cmd
+backend/mvnw
+
+# Node & React
+frontend/node_modules/
+**/node_modules/
+frontend/dist/
+**/dist/
+frontend/build/
+**/build/
+.npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.pnpm-debug.log*
+.eslintcache
+
+# IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+backend/out/
+
+.vscode/
+*.code-workspace
+.history/
+
+# Mics
+*.log
+logs/
+*.sql.bak
+*.dump
+*.backup
+scratch/
+tmp/
+temp/
