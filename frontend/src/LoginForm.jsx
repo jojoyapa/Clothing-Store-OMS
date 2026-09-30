@@ -1,33 +1,27 @@
 import { useState } from 'react';
 
-export default function LoginForm() {
+export default function LoginForm({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
 
   const handleLogin = (e) => {
-    e.preventDefault();
-    
+    e.preventDefault(); 
     fetch('http://localhost:8080/api/auth/login', {
-      method: 'POST',
+      method: 'POST', 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     })
     .then(async response => {
       const text = await response.text();
-      
       if (response.ok) {
         localStorage.setItem('oms_session_token', text);
-        
-        setMessage("Login Successful! You are now securely authenticated.");
-        
-        // for verification
-        console.log("Saved JWT:", text); 
+        if (onLoginSuccess) onLoginSuccess();
       } else {
         setMessage(`❌ Error: ${text}`);
       }
     })
-    .catch(error => setMessage("Connection refused. Is the server running?"));
+    .catch(error => setMessage("Connection refused."));
   };
 
   return (

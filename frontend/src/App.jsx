@@ -1,8 +1,25 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import LoginForm from './LoginForm'
+import Profile from './Profile' // Import your new boundary class
 
 function App() {
   const [showLogin, setShowLogin] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  // check if the user has an active session token when the app loads
+  useEffect(() => {
+    const token = localStorage.getItem('oms_session_token');
+    if (token) {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  // securely log the user out by deleting the token and resetting the view
+  const handleLogout = () => {
+    localStorage.removeItem('oms_session_token');
+    setIsAuthenticated(false);
+    setShowLogin(true);
+  };
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -34,6 +51,26 @@ function App() {
       .catch(error => console.error("Error registering customer:", error))
   }
 
+  // --- AUTHENTICATED VIEW ---
+  // If the user is logged in, show the Profile Dashboard instead of the auth forms
+  if (isAuthenticated) {
+    return (
+      <div style={{ padding: '30px', fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #eee', paddingBottom: '20px' }}>
+          <h2>D'fine</h2>
+          <button 
+            onClick={handleLogout}
+            style={{ padding: '8px 16px', cursor: 'pointer', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}
+          >
+            Logout
+          </button>
+        </div>
+        <Profile />
+      </div>
+    );
+  }
+
+  // --- UNAUTHENTICATED VIEW ---
   return (
     <div style={{ padding: '30px', fontFamily: 'Arial, sans-serif', maxWidth: '600px', margin: '0 auto' }}>
       
@@ -48,7 +85,8 @@ function App() {
       </div>
 
       {showLogin ? (
-        <LoginForm /> 
+        // passes a success callback so the form can tell App.jsx to instantly switch views
+        <LoginForm onLoginSuccess={() => setIsAuthenticated(true)} /> 
       ) : (
         <div style={{ background: '#e3f2fd', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
           <h3>Customer Registration</h3>
