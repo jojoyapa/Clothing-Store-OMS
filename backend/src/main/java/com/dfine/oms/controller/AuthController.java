@@ -35,6 +35,9 @@ public class AuthController {
     @Autowired
     private UserLoginAuditRepository auditRepository;
 
+    @Autowired
+    private com.dfine.dfineoms.util.JwtUtil jwtUtil;
+
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @GetMapping("/customers")
@@ -91,8 +94,11 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Account is locked or suspended");
         }
 
+        // generates the session token
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+
         logAudit(user, request.email, ipAddress, "SUCCESS");
-        return ResponseEntity.ok("Login successful for role: " + user.getRole());
+        return ResponseEntity.ok(token); // Returns the actual JWT instead of a simple success message
     }
 
     private void logAudit(AppUser user, String email, String ip, String status) {
