@@ -26,4 +26,24 @@ public class JwtUtil {
                 .signWith(secretKey)
                 .compact();
     }
+
+    // extracts the user's email from the token payload
+    public String extractEmail(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
+    // verifies that the token hasn't expired
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
