@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.Optional;
 
-@RestController
-@RequestMapping("/api/profile")
+@RestController // marks a class as a REST API controller
+@RequestMapping("/api/profile") // maps incoming HTTP requests to specific classes or methods based on the URL path
 public class ProfileController {
 
-    @Autowired
+    @Autowired // automatically find, create, and inject the required object (bean) into your class
     private CustomerRepository customerRepository;
 
     // fetch the logged-in user's profile data

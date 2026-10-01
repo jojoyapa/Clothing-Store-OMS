@@ -7,13 +7,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -38,17 +40,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (jwtUtil.validateToken(jwt)) {
             String email = jwtUtil.extractEmail(jwt);
+            String role = jwtUtil.extractRole(jwt); // Extract the role claim from the token
 
             // If the token is valid and no one is currently logged in to this request thread
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                // Create an official Spring Security authentication token
+                // Convert the string role into a Spring Security granted authority
+                List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role));
+
+                // Create an official Spring Security authentication token including the authorities
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        email, null, new ArrayList<>()
+                        email, null, authorities
                 );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // Save it to the context so the ProfileController can extract the Principal
+                // Save it to the context so controllers can extract the Principal and roles are enforced
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }

@@ -37,6 +37,16 @@ public class JwtUtil {
                 .getSubject();
     }
 
+    // extracts the user's role from the token payload
+    public String extractRole(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
+    }
+
     // verifies that the token hasn't expired
     public boolean validateToken(String token) {
         try {
