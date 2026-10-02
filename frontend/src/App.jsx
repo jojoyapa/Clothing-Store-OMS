@@ -1,26 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import LoginForm from './LoginForm'
-import Profile from './Profile' // Import your new boundary class
+import Profile from './Profile'
+import ProtectedRoute from './ProtectedRoute'
 
 function App() {
-  const [showLogin, setShowLogin] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-  // check if the user has an active session token when the app loads
-  useEffect(() => {
-    const token = localStorage.getItem('oms_session_token');
-    if (token) {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  // securely log the user out by deleting the token and resetting the view
-  const handleLogout = () => {
-    localStorage.removeItem('oms_session_token');
-    setIsAuthenticated(false);
-    setShowLogin(true);
-  };
-
+  // Registration form states
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [firstName, setFirstName] = useState('')
@@ -46,79 +31,123 @@ function App() {
         setEmail(''); setPassword(''); setFirstName(''); setLastName(''); setContactNumber('');
         setShippingAddress(''); setCity(''); setDistrict(''); setProvince(''); setPostalCode('');
         alert("Registration Successful! Please log in.");
-        setShowLogin(true); 
+        window.location.href = "/login"; 
       })
       .catch(error => console.error("Error registering customer:", error))
   }
 
-  // --- AUTHENTICATED VIEW ---
-  // If the user is logged in, show the Profile Dashboard instead of the auth forms
-  if (isAuthenticated) {
-    return (
-      <div style={{ padding: '30px', fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #eee', paddingBottom: '20px' }}>
-          <h2>D'fine</h2>
-          <button 
-            onClick={handleLogout}
-            style={{ padding: '8px 16px', cursor: 'pointer', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}
-          >
-            Logout
-          </button>
-        </div>
-        <Profile />
-      </div>
-    );
-  }
-
-  // --- UNAUTHENTICATED VIEW ---
   return (
-    <div style={{ padding: '30px', fontFamily: 'Arial, sans-serif', maxWidth: '600px', margin: '0 auto' }}>
-      
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2>D'fine</h2>
-        <button 
-          onClick={() => setShowLogin(!showLogin)}
-          style={{ padding: '8px 16px', cursor: 'pointer', background: '#333', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}
-        >
-          {showLogin ? "Go to Register" : "Go to Login"}
-        </button>
-      </div>
+    <Router>
+      <Routes>
+        {/* Default Route redirecting to Login */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
-      {showLogin ? (
-        // passes a success callback so the form can tell App.jsx to instantly switch views
-        <LoginForm onLoginSuccess={() => setIsAuthenticated(true)} /> 
-      ) : (
-        <div style={{ background: '#e3f2fd', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
-          <h3>Customer Registration</h3>
-          <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required style={{ padding: '8px', flex: 1 }} />
-              <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} required style={{ padding: '8px', flex: 1 }} />
+        {/* Public Login Route */}
+        <Route path="/login" element={
+          <div style={{ padding: '30px', fontFamily: 'Arial, sans-serif', maxWidth: '600px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2>D'fine</h2>
+              <a 
+                href="/register" 
+                style={{ padding: '8px 16px', background: '#333', color: 'white', textDecoration: 'none', borderRadius: '4px', fontWeight: 'bold' }}
+              >
+                Go to Register
+              </a>
             </div>
-            <input type="tel" placeholder="Contact Number" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} required style={{ padding: '8px' }} />
-            <input type="email" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ padding: '8px' }} />
-            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ padding: '8px' }} />
-            
-            <h3 style={{ marginTop: '10px', marginBottom: '5px' }}>Shipping Address</h3>
-            <input type="text" placeholder="Street Address" value={shippingAddress} onChange={(e) => setShippingAddress(e.target.value)} required style={{ padding: '8px' }} />
-            
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <input type="text" placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} required style={{ padding: '8px', flex: 1 }} />
-              <input type="text" placeholder="District" value={district} onChange={(e) => setDistrict(e.target.value)} required style={{ padding: '8px', flex: 1 }} />
+            {/* The missing prop is restored here to redirect on success */}
+            <LoginForm onLoginSuccess={() => window.location.href = '/profile'} />
+          </div>
+        } />
+
+        {/* Public Registration Route */}
+        <Route path="/register" element={
+          <div style={{ padding: '30px', fontFamily: 'Arial, sans-serif', maxWidth: '600px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2>D'fine</h2>
+              <a 
+                href="/login" 
+                style={{ padding: '8px 16px', background: '#333', color: 'white', textDecoration: 'none', borderRadius: '4px', fontWeight: 'bold' }}
+              >
+                Go to Login
+              </a>
             </div>
             
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <input type="text" placeholder="Province" value={province} onChange={(e) => setProvince(e.target.value)} required style={{ padding: '8px', flex: 1 }} />
-              <input type="text" placeholder="Postal Code" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} style={{ padding: '8px', flex: 1 }} />
+            <div style={{ background: '#e3f2fd', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
+              <h3>Customer Registration</h3>
+              <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <input type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required style={{ padding: '8px', flex: 1 }} />
+                  <input type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} required style={{ padding: '8px', flex: 1 }} />
+                </div>
+                <input type="tel" placeholder="Contact Number" value={contactNumber} onChange={(e) => setContactNumber(e.target.value)} required style={{ padding: '8px' }} />
+                <input type="email" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ padding: '8px' }} />
+                <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ padding: '8px' }} />
+                
+                <h3 style={{ marginTop: '10px', marginBottom: '5px' }}>Shipping Address</h3>
+                <input type="text" placeholder="Street Address" value={shippingAddress} onChange={(e) => setShippingAddress(e.target.value)} required style={{ padding: '8px' }} />
+                
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <input type="text" placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} required style={{ padding: '8px', flex: 1 }} />
+                  <input type="text" placeholder="District" value={district} onChange={(e) => setDistrict(e.target.value)} required style={{ padding: '8px', flex: 1 }} />
+                </div>
+                
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <input type="text" placeholder="Province" value={province} onChange={(e) => setProvince(e.target.value)} required style={{ padding: '8px', flex: 1 }} />
+                  <input type="text" placeholder="Postal Code" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} style={{ padding: '8px', flex: 1 }} />
+                </div>
+                
+                <button type="submit" style={{ padding: '12px', background: '#1976d2', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '15px', fontWeight: 'bold' }}>
+                  Complete Registration
+                </button>
+              </form>
             </div>
-            
-            <button type="submit" style={{ padding: '12px', background: '#1976d2', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '15px', fontWeight: 'bold' }}>
-              Complete Registration
-            </button>
-          </form>
-        </div>
-      )}
-    </div>
+          </div>
+        } />
+
+        {/* Customer Profile Route (Protected: Requires any valid login token) */}
+        <Route 
+          path="/profile" 
+          element={
+            <ProtectedRoute>
+              <div style={{ padding: '30px', fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #eee', paddingBottom: '20px' }}>
+                  <h2>D'fine</h2>
+                  <button 
+                    onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
+                    style={{ padding: '8px 16px', cursor: 'pointer', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}
+                  >
+                    Logout
+                  </button>
+                </div>
+                <Profile />
+              </div>
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Admin Trend Analytics Route (Protected with RBAC: Requires STORE_STAFF role) */}
+        <Route 
+          path="/admin/analytics" 
+          element={
+            <ProtectedRoute requiredRole="STORE_STAFF">
+              <div style={{ padding: '30px', fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #eee', paddingBottom: '20px' }}>
+                  <h2>D'fine — Admin Portal</h2>
+                  <button 
+                    onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
+                    style={{ padding: '8px 16px', cursor: 'pointer', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}
+                  >
+                    Logout
+                  </button>
+                </div>
+                <h3>Customer Behavior & Trend Analytics Dashboard</h3>
+                <p>Welcome, Store Staff! Admin analytics and metric summaries will be rendered here.</p>
+              </div>
+            </ProtectedRoute>
+          } 
+        />
+      </Routes>
+    </Router>
   )
 }
 

@@ -14,14 +14,30 @@ export default function LoginForm({ onLoginSuccess }) {
     })
     .then(async response => {
       const text = await response.text();
+      
       if (response.ok) {
+        // 1. Save the raw token string
         localStorage.setItem('oms_session_token', text);
+        
+        // 2. Decode the JWT payload to extract the role for your ProtectedRoute
+        try {
+          const payloadBase64 = text.split('.')[1];
+          const decodedPayload = JSON.parse(atob(payloadBase64));
+          localStorage.setItem("role", decodedPayload.role); 
+        } catch (error) {
+          console.error("Failed to decode token role", error);
+        }
+
+        // 3. Trigger the redirect
         if (onLoginSuccess) onLoginSuccess();
       } else {
         setMessage(`❌ Error: ${text}`);
       }
     })
-    .catch(error => setMessage("Connection refused."));
+    .catch(error => {
+      console.error(error); // This will print actual JS errors to your console now
+      setMessage("Network error or connection refused.");
+    });
   };
 
   return (
@@ -49,7 +65,6 @@ export default function LoginForm({ onLoginSuccess }) {
         </button>
       </form>
       
-      {/*message*/}
       {message && (
         <div style={{ 
             marginTop: '15px', 
