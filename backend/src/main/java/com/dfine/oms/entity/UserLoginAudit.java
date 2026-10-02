@@ -18,13 +18,13 @@ public class UserLoginAudit {
 
     private String attemptedEmail;
 
-    @Column(nullable = false, length = 45)
+    @Column(nullable = false, length = 50)
     private String ipAddress;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime loginTime = LocalDateTime.now();
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 50)
     private String loginStatus;
 
     public Long getAuditId() { return auditId; }
