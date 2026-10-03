@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
+  const navigate = useNavigate();
+  const userRole = localStorage.getItem("role");
+
   const [profile, setProfile] = useState({
     firstName: '', lastName: '', contactNumber: '',
     shippingAddress: '', city: '', district: '', province: '', postalCode: ''
   });
   const [message, setMessage] = useState('');
 
-  // 1. Fetch the user's data when the component loads
+  // fetches the user's data when the component loads
   useEffect(() => {
-    const token = localStorage.getItem('oms_session_token');
+    const token = localStorage.getItem('token');
     
     if (!token) {
       setMessage("No active session. Please log in first.");
@@ -19,7 +23,7 @@ export default function Profile() {
     fetch('http://localhost:8080/api/profile', {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}` // This is how the backend identifies the user
+        'Authorization': `Bearer ${token}` // how the backend identifies the user
       }
     })
     .then(res => {
@@ -34,16 +38,16 @@ export default function Profile() {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
-  // 2. Send the updated data back to the server
+  // sends the updated data back to the server
   const handleUpdate = (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('oms_session_token');
+    const token = localStorage.getItem('token');
 
     fetch('http://localhost:8080/api/profile', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` // Must attach the token again for the update
+        'Authorization': `Bearer ${token}` 
       },
       body: JSON.stringify(profile)
     })
@@ -56,8 +60,21 @@ export default function Profile() {
   };
 
   return (
-    <div style={{ padding: '20px', background: '#f5f5f5', borderRadius: '8px', maxWidth: '500px', marginTop: '20px' }}>
-      <h3>My Profile</h3>
+    <div style={{ padding: '20px', background: '#f5f5f5', borderRadius: '8px', maxWidth: '500px', marginTop: '20px', margin: '20px auto' }}>
+      
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+        <h3 style={{ margin: 0 }}>My Profile</h3>
+        
+        {/* this button will ONLY show up if the logged-in user is a staff member */}
+        {userRole === 'STORE_STAFF' && (
+          <button 
+            onClick={() => navigate('/admin/dashboard')}
+            style={{ padding: '8px 16px', background: '#1976d2', color: 'white', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', border: 'none' }}
+          >
+            Admin Dashboard
+          </button>
+        )}
+      </div>
       
       {message && (
         <div style={{ marginBottom: '15px', padding: '10px', background: '#e3f2fd', borderRadius: '4px' }}>

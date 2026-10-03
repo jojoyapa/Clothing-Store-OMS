@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import LoginForm from './LoginForm'
-import Profile from './Profile'
 import ProtectedRoute from './ProtectedRoute'
+import AdminDashboard from "./AdminDashboard";
 
 function App() {
   // Registration form states
@@ -39,8 +39,22 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Default Route redirecting to Login */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* Public Home */}
+        <Route path="/" element={
+          <div style={{ padding: '30px', fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #eee', paddingBottom: '20px', marginBottom: '20px' }}>
+              <h2>D'fine</h2>
+              <button 
+                onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
+                style={{ padding: '8px 16px', cursor: 'pointer', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}
+              >
+                Logout
+              </button>
+            </div>
+            <h1>Welcome to D'fine</h1>
+            <p>The customer storefront will go here.</p>
+          </div>
+        } />
 
         {/* Public Login Route */}
         <Route path="/login" element={
@@ -54,8 +68,16 @@ function App() {
                 Go to Register
               </a>
             </div>
-            {/* The missing prop is restored here to redirect on success */}
-            <LoginForm onLoginSuccess={() => window.location.href = '/profile'} />
+
+            <LoginForm onLoginSuccess={() => {
+              const role = localStorage.getItem('role'); 
+  
+              if (role === 'STORE_STAFF' || role === 'ADMIN') {
+                window.location.href = '/admin/dashboard';
+              } else {
+                window.location.href = '/';
+              }
+            }} />
           </div>
         } />
 
@@ -104,45 +126,12 @@ function App() {
           </div>
         } />
 
-        {/* Customer Profile Route (Protected: Requires any valid login token) */}
+        {/* Admin Dashboard */}
         <Route 
-          path="/profile" 
-          element={
-            <ProtectedRoute>
-              <div style={{ padding: '30px', fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #eee', paddingBottom: '20px' }}>
-                  <h2>D'fine</h2>
-                  <button 
-                    onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
-                    style={{ padding: '8px 16px', cursor: 'pointer', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}
-                  >
-                    Logout
-                  </button>
-                </div>
-                <Profile />
-              </div>
-            </ProtectedRoute>
-          } 
-        />
-
-        {/* Admin Trend Analytics Route (Protected with RBAC: Requires STORE_STAFF role) */}
-        <Route 
-          path="/admin/analytics" 
+          path="/admin/dashboard" 
           element={
             <ProtectedRoute requiredRole="STORE_STAFF">
-              <div style={{ padding: '30px', fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #eee', paddingBottom: '20px' }}>
-                  <h2>D'fine — Admin Portal</h2>
-                  <button 
-                    onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
-                    style={{ padding: '8px 16px', cursor: 'pointer', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}
-                  >
-                    Logout
-                  </button>
-                </div>
-                <h3>Customer Behavior & Trend Analytics Dashboard</h3>
-                <p>Welcome, Store Staff! Admin analytics and metric summaries will be rendered here.</p>
-              </div>
+              <AdminDashboard />
             </ProtectedRoute>
           } 
         />

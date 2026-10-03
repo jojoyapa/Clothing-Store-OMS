@@ -2,8 +2,7 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children, requiredRole }) => {
-  // Restored your original storage key
-  const token = localStorage.getItem("oms_session_token");
+  const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("role");
 
   if (!token) {
@@ -11,7 +10,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   }
 
   if (requiredRole && userRole !== requiredRole) {
-    return <Navigate to="/profile" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return children;
