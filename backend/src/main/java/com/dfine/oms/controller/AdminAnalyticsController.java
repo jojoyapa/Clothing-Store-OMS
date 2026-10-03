@@ -1,15 +1,22 @@
 package com.dfine.dfineoms.controller;
 
+import com.dfine.dfineoms.dto.AnalyticsSummary;
+import com.dfine.dfineoms.service.AnalyticsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/admin/analytics")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AdminAnalyticsController {
 
-    @GetMapping("/analytics")
-    public ResponseEntity<?> getCustomerAnalytics() {
-        // Only accessible if the JWT filter and Spring Security validate "STORE_STAFF" authority
-        return ResponseEntity.ok("Secure analytics data loaded successfully.");
+    @Autowired
+    private AnalyticsService analyticsService;
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<AnalyticsSummary> getDashboardData() {
+        AnalyticsSummary summary = analyticsService.getStoreAnalytics();
+        return ResponseEntity.ok(summary);
     }
 }

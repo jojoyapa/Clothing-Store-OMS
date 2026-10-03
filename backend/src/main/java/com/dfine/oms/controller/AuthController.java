@@ -8,6 +8,9 @@ import com.dfine.dfineoms.repository.CustomerRepository;
 import com.dfine.dfineoms.repository.UserLoginAuditRepository;
 import com.dfine.dfineoms.dto.CustomerRegistrationRequest;
 import com.dfine.dfineoms.dto.LoginRequest;
+import com.dfine.dfineoms.repository.StoreStaffRepository;
+import com.dfine.dfineoms.entity.StoreStaff;
+import com.dfine.dfineoms.dto.StaffRegistrationRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,6 +44,9 @@ public class AuthController {
 
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    @Autowired
+    private StoreStaffRepository storeStaffRepository;
+
     @GetMapping("/customers")
     public List<Customer> getAllCustomers() {
         return customerRepository.findAll();
@@ -52,7 +58,7 @@ public class AuthController {
         AppUser newUser = new AppUser();
         newUser.setEmail(request.email);
         newUser.setPasswordHash(passwordEncoder.encode(request.password)); // passwords are securely hashed
-        newUser.setRole("CUSTOMER");
+        newUser.setUserRole("CUSTOMER");
         newUser.setAccountStatus("ACTIVE");
         AppUser savedUser = userRepository.save(newUser);
 
@@ -69,6 +75,31 @@ public class AuthController {
         customer.setAppUser(savedUser);
 
         return customerRepository.save(customer);
+    }
+
+    @PostMapping("/register/staff")
+    public ResponseEntity<?> registerStaff(@RequestBody StaffRegistrationRequest request) {
+        if (userRepository.findByEmail(request.email).isPresent()) {
+            return ResponseEntity.badRequest().body("Email is already in use.");
+        }
+
+        AppUser newUser = new AppUser();
+        newUser.setEmail(request.email);
+        newUser.setPasswordHash(passwordEncoder.encode(request.password));
+        newUser.setUserRole("STORE_STAFF");
+        newUser.setAccountStatus("ACTIVE");
+        AppUser savedUser = userRepository.save(newUser);
+
+        StoreStaff staff = new StoreStaff();
+        staff.setFirstName(request.firstName);
+        staff.setLastName(request.lastName);
+        staff.setDesignation(request.designation);
+        staff.setClearanceLevel(request.clearanceLevel);
+        staff.setAppUser(savedUser);
+
+        storeStaffRepository.save(staff);
+
+        return ResponseEntity.ok("Staff account provisioned successfully");
     }
 
     @PostMapping("/login")
@@ -99,7 +130,7 @@ public class AuthController {
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
 
         logAudit(user, request.email, ipAddress, "SUCCESS");
-        return ResponseEntity.ok(token); // Returns the actual JWT instead of a simple success message
+        return ResponseEntity.ok(token);
     }
 
     private void logAudit(AppUser user, String email, String ip, String status) {

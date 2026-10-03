@@ -17,8 +17,8 @@ public class AppUser {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(nullable = false) // defaults to "CUSTOMER" if no other role is provided
-    private String role = "CUSTOMER";
+    @Column(name = "user_role", nullable = false) // defaults to "CUSTOMER" if no other role is provided
+    private String userRole = "CUSTOMER";
 
     @Column(name = "account_status", nullable = false) // defaults to "ACTIVE" if no other status is provided
     private String accountStatus = "ACTIVE";
@@ -39,7 +39,7 @@ public class AppUser {
     }
 
     public String getRole() {
-        return role;
+        return userRole;
     }
 
     public String getAccountStatus() {
@@ -58,8 +58,8 @@ public class AppUser {
         this.passwordHash = passwordHash;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setUserRole(String userRole) {
+        this.userRole = userRole;
     }
 
     public void setAccountStatus(String accountStatus) {
