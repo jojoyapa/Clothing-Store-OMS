@@ -26,7 +26,7 @@ export default function AdminPortal() {
       return;
     }
 
-    // fetchs both Profile and Analytics data on load
+    // fetches both Profile and Analytics data on load
     const fetchData = async () => {
       try {
         const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
@@ -36,10 +36,21 @@ export default function AdminPortal() {
           fetch('http://localhost:8080/api/admin/analytics/dashboard', { headers })
         ]);
 
-        if (profileRes.ok) setProfile(await profileRes.json());
-        if (analyticsRes.ok) setAnalytics(await analyticsRes.json());
+        if (profileRes.ok) {
+            setProfile(await profileRes.json());
+        } else {
+            console.error("Profile fetch failed with status:", profileRes.status);
+        }
+
+        if (analyticsRes.ok) {
+            setAnalytics(await analyticsRes.json());
+        } else {
+            console.error("Analytics fetch failed with status:", analyticsRes.status);
+        }
+        
       } catch (err) {
         setMessage('Network error loading portal data.');
+        console.error("Fetch error:", err);
       } finally {
         setLoading(false);
       }
@@ -123,22 +134,31 @@ export default function AdminPortal() {
       </div>
 
       {/* CONTENT: ANALYTICS */}
-      {activeTab === 'dashboard' && analytics && (
-        <div>
-          <div style={{ display: 'flex', gap: '20px', marginBottom: '30px', flexWrap: 'wrap' }}>
-            <MetricCard color="#1976d2" title="Registered Customers" value={analytics.totalCustomers} />
-            <MetricCard color="#f57c00" title="Orders Processed" value={analytics.totalOrders} />
-            <MetricCard color="#388e3c" title="Total Revenue" value={`$${analytics.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} />
-          </div>
-          <div style={{ background: '#f8f9fa', padding: '25px', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
-            <h3 style={{ marginTop: 0, color: '#444' }}>Order Status Breakdown</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
-              {Object.entries(analytics.ordersByStatus).map(([status, count]) => (
-                <StatusBar count={count} key={status} status={status} total={analytics.totalOrders} />
-              ))}
+      {activeTab === 'dashboard' && (
+        analytics ? (
+          <div>
+            <div style={{ display: 'flex', gap: '20px', marginBottom: '30px', flexWrap: 'wrap' }}>
+              <MetricCard color="#1976d2" title="Registered Customers" value={analytics.totalCustomers} />
+              <MetricCard color="#f57c00" title="Orders Processed" value={analytics.totalOrders} />
+              <MetricCard color="#388e3c" title="Total Revenue" value={`$${analytics.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} />
+            </div>
+            <div style={{ background: '#f8f9fa', padding: '25px', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
+              <h3 style={{ marginTop: 0, color: '#444' }}>Order Status Breakdown</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
+                {Object.entries(analytics.ordersByStatus).map(([status, count]) => (
+                  <StatusBar count={count} key={status} status={status} total={analytics.totalOrders} />
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div style={{ background: '#ffebee', padding: '25px', borderRadius: '8px', border: '1px solid #ef5350', textAlign: 'center' }}>
+            <h3 style={{ color: '#c62828', marginTop: 0 }}>Analytics Data Unavailable</h3>
+            <p style={{ color: '#b71c1c', marginBottom: 0 }}>
+              The backend endpoint <strong>/api/admin/analytics/dashboard</strong> returned an error or was not found. Please verify your AdminAnalyticsController mapping.
+            </p>
+          </div>
+        )
       )}
 
       {/* CONTENT: MANAGE STAFF */}

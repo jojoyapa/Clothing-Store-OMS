@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function LoginForm({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const navigate = useNavigate(); // 1. Initialize the navigate hook
 
   const handleLogin = (e) => {
     e.preventDefault(); 
@@ -21,14 +23,29 @@ export default function LoginForm({ onLoginSuccess }) {
         
         try {
           const payloadBase64Url = cleanToken.split('.')[1];
-          // converts Base64Url to standard Base64 so atob() doesn't crash
-          const base64 = payloadBase64Url.replace(/-/g, '+').replace(/_/g, '/');
+          let base64 = payloadBase64Url.replace(/-/g, '+').replace(/_/g, '/');
+          
+          while (base64.length % 4 !== 0) {
+            base64 += '=';
+          }
+          
           const decodedPayload = JSON.parse(atob(base64));
           
-          console.log("Decoded Token Payload:", decodedPayload);
-          localStorage.setItem("role", decodedPayload.role); 
+          // Use 'role' because that is exactly what JwtUtil calls it
+          const userRole = decodedPayload.role; 
+          
+          localStorage.setItem("role", userRole); 
+
+          // Update the condition to match the exact string from your database
+          if (userRole === 'ADMIN' || userRole === 'STORE_STAFF') {
+              navigate('/dashboard');
+          } else {
+              navigate('/');
+          }
+
         } catch (error) {
           console.error("Failed to decode token role", error);
+          navigate('/'); // Fallback for standard users if decoding fails
         }
 
         if (onLoginSuccess) onLoginSuccess();
@@ -65,6 +82,7 @@ export default function LoginForm({ onLoginSuccess }) {
         <button type="submit" style={{ padding: '10px', background: '#2e7d32', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
           Sign In
         </button>
+        <p><Link to="/forgot-password">Forgot your password?</Link></p>
       </form>
       
       {message && (

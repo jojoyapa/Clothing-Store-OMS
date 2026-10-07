@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import LoginForm from './LoginForm'
 import ProtectedRoute from './ProtectedRoute'
 import AdminDashboard from "./AdminDashboard";
+import ForgotPassword from './ForgotPassword';
+import ResetPassword from './ResetPassword';
 
 function App() {
   // Registration form states
@@ -128,13 +130,17 @@ function App() {
 
         {/* Admin Dashboard */}
         <Route 
-          path="/admin/dashboard" 
-          element={
-            <ProtectedRoute requiredRole="STORE_STAFF">
-              <AdminDashboard />
-            </ProtectedRoute>
-          } 
-        />
+            path="/admin/dashboard" 
+            element={
+                <ProtectedRoute>
+                    <AdminDashboard />
+                </ProtectedRoute>
+    } 
+/>
+
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        
       </Routes>
     </Router>
   )
